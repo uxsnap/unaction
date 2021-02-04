@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import deepEqual from 'deep-equal';
 /** Context that provides access to fresh store */
 export const Context = React.createContext(null);
 
