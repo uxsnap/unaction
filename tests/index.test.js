@@ -1,4 +1,4 @@
-import { createStore, createMutationController } from '../../src/index.js';
+import { createStore, createMutationController } from '../src/index.js';
 import deepEqual from 'deep-equal';
 
 const removeMethodsFromStoreState = (state) => {
@@ -50,9 +50,11 @@ test('State\'s data is clearing to initialState', () => {
   expect(store.filterController.filterType).toBe(filterState().filterType);
 });
 
-test('State\'s data is not changin differen field', () => {
+test('State\'s data is not changing different fields', () => {
   store.filterController.updateFilterType('new_records');
   expect(store.filterController.filterType).toBe('new_records');
   store.filterController.clearFilterType();
   expect(store.filterController.filterName).toBe(filterState().filterName);
+  expect(deepEqual(store.filterController.filterFromBackend, filterState().filterFromBackend)).toBeTruthy();
 });
+
