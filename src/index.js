@@ -1,18 +1,14 @@
 /** 
 HELPERS 
 ***/
-
 const checkForAnyPathEquality = (currentValueToCheck, pathToFind) => {
   if (!currentValueToCheck) throw new Error("Cannot find needed path with current wildcard");
   const currentValueToCheckKeys = Object
     .keys(currentValueToCheck)
     .filter(key => typeof currentValueToCheck[key] !== 'object');
   for (const key in currentValueToCheck) {
-    if (currentValueToCheck[key][pathToFind]) {
-      return currentValueToCheck[key][pathToFind];
-    } else {
-      return checkForAnyPathEquality(currentValueToCheck[key], pathToFind);
-    }
+    if (currentValueToCheck[key][pathToFind]) return currentValueToCheck[key][pathToFind];
+    else return checkForAnyPathEquality(currentValueToCheck[key], pathToFind);
   }
   return null;
 };
@@ -20,14 +16,18 @@ const checkForAnyPathEquality = (currentValueToCheck, pathToFind) => {
 const smack = (newlyCreatedStore) => {
   const searchByWildCard = (fieldName) => {
     if (!newlyCreatedStore) throw new Error("Store is not created");
+
     const cataloguePath = fieldName.split('.');
+    
     if (!cataloguePath.length) throw new Error("There is no such field name");
     else if (cataloguePath === fieldName) 
       return newlyCreatedStore[fieldName];
     else {
       if (cataloguePath[0] === '*') throw new Error("Cannot use wildcard-operator from the root of the store");
+    
       let resultPath = cataloguePath[0];
       let value = newlyCreatedStore[resultPath]
+    
       for (let i = 1; i < cataloguePath.length; i++) {
         if (cataloguePath[i] === '*') {
           if (cataloguePath[i + 1] === "*") throw new Error("Cannot use * after *");
@@ -53,14 +53,12 @@ const smack = (newlyCreatedStore) => {
 export function createStore(states, middlewares = []) {
   const listeners = [];
 
-  function subscribe(newListener) {
+  const subscribe = (newListener) => {
     listeners.push(newListener);
     return listeners.length - 1;
   }
 
-  function unsubscribe(id) {
-    listeners.splice(id, 1);
-  }
+  const unsubscribe = (id) => listeners.splice(id, 1);
 
   const newStore = {};
   for (const key in states) {
@@ -84,6 +82,7 @@ export const createMutationController =
   (stateKey) => 
   function(storeObject, listeners, middlewares) {
     let mutations = {};
+
     const handleCreatingActionToEveryField = (key, state) => {
       const methodName = key[0].toUpperCase() + key.slice(1);
       const updateName = "update" + methodName;
