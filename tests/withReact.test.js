@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import Enzyme, { mount } from 'enzyme';
-import { connect, StoreProvider } from '../src/reactConnect';
+import { connect, StoreProvider } from '../reactConnect';
 import deepEqual from 'deep-equal';
 import Adapter from 'enzyme-adapter-react-16';
 import { 

@@ -1,4 +1,4 @@
-import { createStore, createMutationController } from '../src/index.js';
+import { createStore, createMutationController } from '../index.js';
 import deepEqual from 'deep-equal';
 
 const removeMethodsFromStoreState = (state) => {
