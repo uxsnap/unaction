@@ -1,38 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import Enzyme, { mount } from 'enzyme';
-import { createStore, createMutationController } from '../src';
 import { connect, StoreProvider } from '../src/reactConnect';
 import deepEqual from 'deep-equal';
 import Adapter from 'enzyme-adapter-react-16';
+import { 
+  TODOS, 
+  todoState, 
+  filterState, 
+  store, 
+  updateTodos, 
+  updateFilterValue, 
+  updateFilterName, 
+  getAsyncTodos
+} from './helpers';
 
 Enzyme.configure({ adapter: new Adapter() });
 
-const todoState = () => ({
-  todos: { status: -1, data: [] },  
-}); 
+export const Todos = ({ todos, filterName, filterValue }) => {
 
-const todoController = createMutationController(todoState);
+  useEffect(() => {
+    getAsyncTodos()
+      .then((res) => updateTodos(res)); 
+  }, [filterValue]);
 
-const store = createStore({
-  todo: todoController
-});
+  const updateFilter = (event) => updateFilterValue(event.target.value);
 
-export const Todos = ({ todos }) => {
+  const filteredTodos = todos.data.filter((todo) => todo[filterName].includes(filterValue));
+
   return (
-    <div className="todos">
-      {todos.data.map((todo) => {
-        <div className="todo">
-          <span>{todo.id}</span>  
-          <span>{todo.name}</span>  
-        </div> 
-      })}
-    </div> 
+    <div className="container">
+      <input onChange={updateFilter}/> 
+      <div className="todos">
+        {filteredTodos.map((todo) => {
+          <div className="todo">
+            <span>{todo.id}</span>  
+            <span>{todo.name}</span>  
+          </div> 
+        })}
+      </div> 
+    </div>
   );
 };
 
 export const mapProps = {
-  todos: 'todo.todos'
+  todos: 'todo.todos',
+  filterValue: 'filter.filterValue',
+  filterName: 'filter.filterName', 
 };
 
 export const TodosContainer = () => connect(mapProps, Todos);
@@ -43,16 +57,39 @@ const toMount = (
   </StoreProvider>
 );
 
-let wrapper = mount(toMount);
+let wrapper= mount(toMount);
 
-test('TodosContainer has mapped props from provided store', () => {
-  expect(deepEqual(wrapper.find(Todos).props().todos, todoState().todos)).toBeTruthy();
-});
+describe('TodosContainer tests', () => {
+  test('mapped props from provided store', () => {
+    expect(deepEqual(wrapper.find(Todos).props().todos, todoState().todos)).toBeTruthy();
+  });
 
-test('TodosContainer updates props when store is updated', () => {
-  const newTodos = { ...todoState().todos, data: [{ id: 1, name: 'First todo' }] };
-  store.todo.updateTodos(newTodos);
-  wrapper = mount(toMount);
-  const props = wrapper.find(Todos).props();
-  expect(deepEqual(props.todos, newTodos)).toBeTruthy();
+  test('updates props when store is updated', () => {
+    const newTodos = { ...todoState().todos, data: [{ id: 1, name: 'First todo' }] };
+    updateTodos(newTodos);
+    wrapper = mount(toMount);
+    const props = wrapper.find(Todos).props();
+    expect(deepEqual(props.todos, newTodos)).toBeTruthy();
+  });
+
+  test('async filter action', () => {
+    updateFilterValue('bar');
+    wrapper = mount(toMount);
+    const wrappedComponent = wrapper.find(Todos);
+    const { filterValue, filterName, todos } = wrappedComponent.props();
+    expect(filterValue).toBe('bar');
+    expect(filterName).toBe('name');
+    expect(todos).toBe(TODOS);
+    updateFilterValue('eggs');
+    expect(wrappedComponent.props().todos).toBe(TODOS);
+  });
+
+  test('error with non-correct props', () => {
+    const errorTest = () => {
+      updateFilterName('bar');
+      wrapper = mount(toMount);
+      const wrappedComponent = wrapper.find(Todos);
+    };
+    expect(errorTest).toThrow(TypeError);
+  });
 });
