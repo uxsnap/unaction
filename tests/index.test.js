@@ -16,6 +16,7 @@ const filterState = () => ({
 });
 
 const filterController = createMutationController(filterState);
+
 test('Controllers are created', () => {
   expect(filterController).toBeTruthy();
 });
