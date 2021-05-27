@@ -49,7 +49,7 @@ export const mapProps = {,
   filterType: 'filter.filterType', 
 };
 
-export const Container = () => connect(mapProps, /* Wrapper component */);
+export const Container = () => connect(mapProps, /* Wrapped component */);
 ```
 
 ### Other things: 
